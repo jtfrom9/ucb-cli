@@ -81,6 +81,9 @@ export function addProject(name: string, id: string): string | undefined {
 }
 
 export function deleteProject(name: string): string | undefined {
+  if (getCurrentProjectName() == name) {
+    return `Current project cannot be deleted. change it first`;
+  }
   const projects = conf.get('projects', []) as string[];
   if (!projects.includes(name)) {
     return `No project: "${name}"`;

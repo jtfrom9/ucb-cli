@@ -63,8 +63,7 @@ export async function main(): Promise<void> {
         .positional('name', { type: 'string', description: 'project name' })
         .positional('id', { type: 'string', description: 'project id' })
         .command({
-          command: 'show',
-          describe: 'print configured projects',
+          command: '*',
           handler: config.printProjects,
         })
         .command({
