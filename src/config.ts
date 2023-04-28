@@ -4,11 +4,14 @@ import { readFileSync, existsSync } from 'fs';
 const conf = new Conf();
 
 export function dump(): void {
-  console.log(`path: ${conf.path}`);
+  console.log(conf.path);
+  console.log('');
   if (existsSync(conf.path)) {
-    console.log(readFileSync(conf.path, 'utf8'));
+    const json = readFileSync(conf.path, 'utf8');
+    console.dir(JSON.parse(json), { depth: null });
   }
 }
+
 export function getCurrentProjectName(): string {
   return conf.get('current', '') as string;
 }
@@ -24,17 +27,23 @@ type Project = {
   targetGroups: TargetGroup[];
 };
 
-export function getProject(project: string): Project | undefined {
-  return conf.get(project, undefined) as Project | undefined;
-}
-
-export function getProjectId(project: string): string {
-  const proj = getProject(project);
-  return proj?.id ?? '';
+export function getProject(projectName: string): Project | undefined {
+  return conf.get(projectName, undefined) as Project | undefined;
 }
 
 export function getCurrentProject(): Project | undefined {
   return getProject(getCurrentProjectName());
+}
+
+export const ConfigKeys = ['apikey', 'orgid'] as const;
+
+type ConfigKey = (typeof ConfigKeys)[number];
+export function setConfig(key: ConfigKey, value: string): void {
+  conf.set(key, value);
+}
+
+export function getConfig(key: ConfigKey): string {
+  return conf.get(key, '') as string;
 }
 
 export function printProjects(): void {
@@ -45,7 +54,7 @@ export function printProjects(): void {
   }
   const current = getCurrentProjectName();
   if (current != undefined) {
-    console.log(`current: ${current}`);
+    console.log(`current: '${current}'\n`);
   }
   for (const name of projects) {
     const project = conf.get(name, {}) as Project;
@@ -67,7 +76,7 @@ export function addProject(name: string, id: string): string | undefined {
   projects.push(name);
   conf.set('projects', projects);
   const current = getCurrentProjectName();
-  if (current == undefined) conf.set('current', name);
+  if (current == '') conf.set('current', name);
   return undefined;
 }
 
@@ -92,7 +101,7 @@ export function useProject(name: string): string | undefined {
   return undefined;
 }
 
-export function addTargets(groupName: string, targetIds: string[]): string | undefined {
+export function addTargets(groupName: string, targetIds: string[], set = false): string | undefined {
   const project = getCurrentProject();
   if (project == undefined) {
     return `Invalid Current Project`;
@@ -104,7 +113,11 @@ export function addTargets(groupName: string, targetIds: string[]): string | und
       targets: targetIds,
     });
   } else {
-    group.targets.push(...targetIds);
+    if (!set) {
+      group.targets.push(...targetIds);
+    } else {
+      group.targets = targetIds;
+    }
   }
   conf.set(project.name, project);
   return undefined;
@@ -131,7 +144,19 @@ export function printTargets(): void {
     console.error(`Invalid Current Project`);
     return;
   }
-  console.dir(project.targetGroups, { depth: null });
+  if (project.targetGroups.length == 0) {
+    console.log('No target group');
+  } else {
+    console.dir(project.targetGroups, { depth: null });
+  }
+}
+
+export function getGroupNames(): string[] {
+  const project = getCurrentProject();
+  if (project == undefined) {
+    return [];
+  }
+  return project.targetGroups.map((group) => group.name);
 }
 
 export function getTargetIds(groupName: string): string[] {
