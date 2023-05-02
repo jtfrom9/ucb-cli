@@ -172,11 +172,14 @@ export async function main(): Promise<void> {
     })
     .command('share', 'share link manipuration', (args) => {
       args
+        .demandCommand(1)
+        .strictCommands()
         .positional('groupName', { type: 'string' })
         .positional('date', { type: 'string' })
         .positional('label', { type: 'string' })
         .command({
           command: 'create <groupName> <date> [label]',
+          describe: 'create share link',
           handler: async (args) => {
             console.log('create share link');
             await ucb.createShareLinks(args.groupName, args.date, args.label);
@@ -184,6 +187,7 @@ export async function main(): Promise<void> {
         })
         .command({
           command: 'delete <groupName> [label]',
+          describe: 'delete share link',
           handler: async (args) => {
             console.log('delete share link');
             await ucb.deleteShareLinks(args.groupName, args.label);
