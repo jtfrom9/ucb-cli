@@ -145,7 +145,7 @@ export async function main(): Promise<void> {
           },
         });
     })
-    .command('build', 'show build results of target groups', (args) => {
+    .command('build <groupName> [label]', 'show build results of target groups', (args) => {
       args
         .strictOptions()
         .positional('groupName', { type: 'string', choices: config.getGroupNames() })
@@ -153,6 +153,7 @@ export async function main(): Promise<void> {
         .option('markdown', { alias: 'm', type: 'boolean', describe: 'show as markdown' })
         .command({
           command: '* <groupName> [label]',
+          describe: 'show build information',
           handler: async (args) => {
             const builds = await ucb.getBuilds(args.groupName, args.label);
             if (!args.markdown) {
