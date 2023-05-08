@@ -97,7 +97,7 @@ function toBuildInfo(item: any): BuildInfo {
 }
 
 async function getTargetBuildsByLabel(target: string, label: string, share: boolean = true): Promise<BuildInfo[]> {
-  const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1`, {
+  const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1&search=${label}`, {
     headers: {
       Authorization: `Basic ${_apikey}`,
     },
