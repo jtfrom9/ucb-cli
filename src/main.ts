@@ -6,7 +6,7 @@ export async function main(): Promise<void> {
   const args = yargs.demandCommand(1).help().wrap(null).strictOptions().strictCommands();
   const scriptName = 'ucb-cli';
 
-  args.usage(`Usage: ${scriptName}`);
+  args.usage(`Usage: ${scriptName} <command> [options]`);
   args.scriptName('');
 
   args
@@ -37,7 +37,7 @@ export async function main(): Promise<void> {
         ucb.setProject(project);
       }
     })
-    .command('config', 'configure cli settings.', async (args) => {
+    .command('config <command>', 'global settings commands', async (args) => {
       args
         .demandCommand(1)
         .strictCommands()
@@ -56,7 +56,7 @@ export async function main(): Promise<void> {
           handler: config.dump,
         });
     })
-    .command('project', 'project setting', (args) => {
+    .command('project <command>', 'project setting commands', (args) => {
       args
         .demandCommand(1)
         .strictCommands()
@@ -105,7 +105,7 @@ export async function main(): Promise<void> {
           },
         });
     })
-    .command('target', 'build target configuration', (args) => {
+    .command('target <command>', 'target group setting commands', (args) => {
       args
         .demandCommand(1)
         .strictCommands()
@@ -145,7 +145,7 @@ export async function main(): Promise<void> {
           },
         });
     })
-    .command('build <groupName> [label]', 'show build results of target groups', (args) => {
+    .command('build <groupName> [label]', 'get build information command', (args) => {
       args
         .strictOptions()
         .positional('groupName', { type: 'string', choices: config.getGroupNames() })
@@ -171,7 +171,7 @@ export async function main(): Promise<void> {
           },
         });
     })
-    .command('share', 'share link manipuration', (args) => {
+    .command('share <command>', 'share link modification commands', (args) => {
       args
         .demandCommand(1)
         .strictCommands()
