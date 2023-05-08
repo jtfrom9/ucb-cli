@@ -138,9 +138,9 @@ Show the build information of the target group specified by `build` command.
 
 #### Get the latest build information
 
-If you specify only a target group, you will get the latest build information for each target.
+If you specify only a target group, you will get the latest build information for each targets.
 
-Below specify `main` target group to show latest build information for each 4 build target, and the build information contains the ShareLink url as below.
+Below example shows the latest build information containing the ShareLink url for each 4 build target of `main` target group (real url are snipped).
 
 ```
 $ ucb-cli build main
@@ -194,11 +194,11 @@ $ ucb-cli build main
 
 #### Get the build information with the specific label
 
-When add **label** as second argument, you will get the build information with the label.
+When specify **label** as second argument, you will get the build information which are specified label added.
 
 Label can be appended to each build from UCB WebUI.
 
-Below is an example with the `main` target group and the `release/20230217-1.2.3-rc` label.
+Below example shows the different build information of `main` target group than the previous example.
 
 ```
 $ ucb-cli build main release/20230217-1.2.3-rc
@@ -254,7 +254,7 @@ $ ucb-cli build main release/20230217-1.2.3-rc
 
 You can update the ShareLink expiration date with the `share create` command.
 
-Below specify the expiration date to `2024-04-01` of the latest builds of `main` target group.
+Below specify the expiration date of the latest builds of `main` target group to `2024-04-01` .
 
 ```
 $ ucb-cli share create main 2024-04-01
@@ -263,13 +263,12 @@ create share link
 
 Also, you can specify label by third argument as below
 
-
 ```
 $ ucb-cli share create main 2024-04-01 release/20230217-1.2.3-rc
 create share link
 ```
 
-delete share links by `share delete` comands as below.
+ShareLinks can be deleted by `share delete` comands as below.
 
 ```
 $ ucb-cli share delete main release/20230217-1.2.3-rc
