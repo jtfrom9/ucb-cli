@@ -77,10 +77,11 @@ export async function main(): Promise<void> {
           },
         })
         .command({
-          command: 'delete <name>',
-          describe: 'delete project definition',
+          command: 'remove <name>',
+          describe: 'remove project definition',
+          aliases: ['rm'],
           handler: async (args) => {
-            const err = config.deleteProject(args.name);
+            const err = config.removeProject(args.name);
             if (err != undefined) {
               console.error(err);
             }
@@ -121,6 +122,14 @@ export async function main(): Promise<void> {
           describe: 'add target group',
           handler: (args) => {
             config.addTargets(args.groupName, args.targetids);
+          },
+        })
+        .command({
+          command: 'remove <groupName>',
+          aliases: ['rm'],
+          describe: 'remove target group',
+          handler: (args) => {
+            config.removeTargets(args.groupName);
           },
         })
         .command({

@@ -80,7 +80,7 @@ export function addProject(name: string, id: string): string | undefined {
   return undefined;
 }
 
-export function deleteProject(name: string): string | undefined {
+export function removeProject(name: string): string | undefined {
   if (getCurrentProjectName() == name) {
     return `Current project cannot be deleted. change it first`;
   }
@@ -122,6 +122,20 @@ export function addTargets(groupName: string, targetIds: string[], set = false):
       group.targets = targetIds;
     }
   }
+  conf.set(project.name, project);
+  return undefined;
+}
+
+export function removeTargets(groupName: string): string | undefined {
+  const project = getCurrentProject();
+  if (project == undefined) {
+    return `Invalid Current Project`;
+  }
+  const index = project.targetGroups.findIndex((group) => group.name === groupName);
+  if (index === -1) {
+    return `No group: ${groupName}`;
+  }
+  project.targetGroups.splice(index, 1);
   conf.set(project.name, project);
   return undefined;
 }
