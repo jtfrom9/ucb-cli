@@ -79,6 +79,7 @@ type BuildInfo = {
   hash: string;
   date: string;
   branch: string;
+  label: string;
   platform: string;
   share_link?: string;
   expire?: string;
@@ -93,39 +94,28 @@ function toBuildInfo(item: any): BuildInfo {
     date: item.finished,
     branch: item.scmBranch,
     platform: item.platform,
+    label: item.label,
   };
 }
 
-async function getTargetBuildsByLabel(target: string, label: string, share: boolean = true): Promise<BuildInfo[]> {
-  const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1&search=${label}`, {
-    headers: {
-      Authorization: `Basic ${_apikey}`,
-    },
-  });
-  // console.log(resp.data.map((item: any) => item.label));
-  const result = resp.data.filter((item: any) => item.label === label).map(toBuildInfo);
-  if (!share) return result;
-  return await Promise.all(
-    result.map(async (info: BuildInfo) => {
-      const sl = await getBuildShareLink(target, info.build);
-      return {
-        ...info,
-        share_link: sl != undefined ? `https://developer.cloud.unity3d.com/share/share.html?shareId=${sl.shareid}` : '',
-        expire: sl?.expire,
-      };
-    })
-  );
-}
+export type BuildObjectKey = 'label' | 'lastBuiltRevision' | 'scmBranch';
 
-async function getTargetBuildsByHash(target: string, hash: string, share: boolean = true): Promise<BuildInfo[]> {
-  // console.log(`hash=${hash}`);
-  const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1&search=${hash}`, {
+async function getTargetBuildsBySearch(
+  target: string,
+  search: string,
+  key: BuildObjectKey,
+  share: boolean = true
+): Promise<BuildInfo[]> {
+  let searchQuery = '';
+  if (key == 'label') searchQuery = `&search=${search}`;
+  // console.log(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1${searchQuery}`);
+  const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1${searchQuery}`, {
     headers: {
       Authorization: `Basic ${_apikey}`,
     },
   });
-  // console.log(resp.data.map((item: any) => item));
-  const result = resp.data.filter((item: any) => item.lastBuiltRevision === hash).map(toBuildInfo);
+  // console.log(resp.data.filter((item: any) => item[key] === search).map((item: any) => item[key]));
+  const result = resp.data.filter((item: any) => item[key] === search).map(toBuildInfo);
   if (!share) return result;
   return await Promise.all(
     result.map(async (info: BuildInfo) => {
@@ -159,15 +149,21 @@ async function getTargetBuildsLatest(target: string, share: boolean = true): Pro
 
 export async function getBuilds(
   targetGroup: string,
-  labelOrHash?: string,
-  hash: boolean = false
+  search?: string,
+  hash: boolean = false,
+  branch: boolean = false
 ): Promise<BuildInfo[]> {
   const result: BuildInfo[] = [];
+  const getKey = (): BuildObjectKey => {
+    if (hash) return 'lastBuiltRevision';
+    else if (branch) return 'scmBranch';
+    return 'label';
+  };
+  const key = getKey();
+  // console.log(`getBuilds(${targetGroup},${search},hash=${hash},branch=${branch})`);
   for (const target of getTargets(targetGroup)) {
-    if (labelOrHash != undefined) {
-      const info = !hash
-        ? await getTargetBuildsByLabel(target, labelOrHash)
-        : await getTargetBuildsByHash(target, labelOrHash);
+    if (search != undefined) {
+      const info = await getTargetBuildsBySearch(target, search, key);
       result.push(...info);
     } else {
       const info = await getTargetBuildsLatest(target);
@@ -178,7 +174,7 @@ export async function getBuilds(
 }
 
 async function createShareLinkToLabel(target: string, date: string, label: string): Promise<void> {
-  const builds = await getTargetBuildsByLabel(target, label, false);
+  const builds = await getTargetBuildsBySearch(target, label, 'label', false);
   for (const info of builds) {
     await axios.post(
       `${getUrl()}/buildtargets/${target}/builds/${info.build}/share`,
@@ -220,7 +216,7 @@ export async function createShareLinks(targetGroup: string, date: string, label?
 }
 
 async function deleteShareLinkToLabel(target: string, label: string): Promise<void> {
-  const builds = await getTargetBuildsByLabel(target, label, false);
+  const builds = await getTargetBuildsBySearch(target, label, 'label', false);
   for (const info of builds) {
     await axios.delete(`${getUrl()}/buildtargets/${target}/builds/${info.build}/share`, {
       headers: {

@@ -160,12 +160,13 @@ export async function main(): Promise<void> {
         .positional('label', { type: 'string' })
         .option('markdown', { alias: 'm', type: 'boolean', describe: 'show as markdown' })
         .option('hash', { alias: 'c', type: 'boolean', default: false, describe: 'hash value instead of groupname' })
+        .option('branch', { alias: 'b', type: 'boolean', default: false, describe: 'branch name instead of groupname' })
         .command({
           command: 'show <groupName> [label]',
           aliases: ['get'],
           describe: 'show build information',
           handler: async (args) => {
-            const builds = await ucb.getBuilds(args.groupName, args.label, args.hash);
+            const builds = await ucb.getBuilds(args.groupName, args.label, args.hash, args.branch);
             if (!args.markdown) {
               console.log(builds);
             } else {
