@@ -154,17 +154,18 @@ export async function main(): Promise<void> {
           },
         });
     })
-    .command('build <groupName> [label]', 'get build information command', (args) => {
+    .command('build <command>', 'get build information command', (args) => {
       args
-        .strictOptions()
         .positional('groupName', { type: 'string', choices: config.getGroupNames() })
         .positional('label', { type: 'string' })
         .option('markdown', { alias: 'm', type: 'boolean', describe: 'show as markdown' })
+        .option('hash', { alias: 'c', type: 'boolean', default: false, describe: 'hash value instead of groupname' })
         .command({
-          command: '* <groupName> [label]',
+          command: 'show <groupName> [label]',
+          aliases: ['get'],
           describe: 'show build information',
           handler: async (args) => {
-            const builds = await ucb.getBuilds(args.groupName, args.label);
+            const builds = await ucb.getBuilds(args.groupName, args.label, args.hash);
             if (!args.markdown) {
               console.log(builds);
             } else {

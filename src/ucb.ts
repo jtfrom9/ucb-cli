@@ -117,6 +117,28 @@ async function getTargetBuildsByLabel(target: string, label: string, share: bool
   );
 }
 
+async function getTargetBuildsByHash(target: string, hash: string, share: boolean = true): Promise<BuildInfo[]> {
+  // console.log(`hash=${hash}`);
+  const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?per_page=500&page=1&search=${hash}`, {
+    headers: {
+      Authorization: `Basic ${_apikey}`,
+    },
+  });
+  // console.log(resp.data.map((item: any) => item));
+  const result = resp.data.filter((item: any) => item.lastBuiltRevision === hash).map(toBuildInfo);
+  if (!share) return result;
+  return await Promise.all(
+    result.map(async (info: BuildInfo) => {
+      const sl = await getBuildShareLink(target, info.build);
+      return {
+        ...info,
+        share_link: sl != undefined ? `https://developer.cloud.unity3d.com/share/share.html?shareId=${sl.shareid}` : '',
+        expire: sl?.expire,
+      };
+    })
+  );
+}
+
 async function getTargetBuildsLatest(target: string, share: boolean = true): Promise<BuildInfo> {
   const resp = await axios.get(`${getUrl()}/buildtargets/${target}/builds?latestBuildPerPlatformOnly=true`, {
     headers: {
@@ -135,11 +157,17 @@ async function getTargetBuildsLatest(target: string, share: boolean = true): Pro
   }
 }
 
-export async function getBuilds(targetGroup: string, label?: string): Promise<BuildInfo[]> {
+export async function getBuilds(
+  targetGroup: string,
+  labelOrHash?: string,
+  hash: boolean = false
+): Promise<BuildInfo[]> {
   const result: BuildInfo[] = [];
   for (const target of getTargets(targetGroup)) {
-    if (label != undefined) {
-      const info = await getTargetBuildsByLabel(target, label);
+    if (labelOrHash != undefined) {
+      const info = !hash
+        ? await getTargetBuildsByLabel(target, labelOrHash)
+        : await getTargetBuildsByHash(target, labelOrHash);
       result.push(...info);
     } else {
       const info = await getTargetBuildsLatest(target);
