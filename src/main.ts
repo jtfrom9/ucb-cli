@@ -1,6 +1,7 @@
 import yargs from 'yargs';
 import * as ucb from './ucb';
 import * as config from './config';
+import { AxiosError } from 'axios';
 
 export async function main(): Promise<void> {
   const args = yargs.demandCommand(1).help().wrap(null).strictOptions().strictCommands();
@@ -205,7 +206,20 @@ export async function main(): Promise<void> {
             await ucb.deleteShareLinks(args.groupName, args.label);
           },
         });
-    });
+    })
+    .fail(() => {});
 
-  await args.parse();
+  try {
+    await args.parse();
+  } catch (e) {
+    if (e instanceof AxiosError) {
+      console.error(`${e}`);
+      if (e.config != undefined) {
+        console.log(`  method: ${e.config.method}`);
+        console.log(`     url: ${e.config.url}`);
+      }
+    } else {
+      console.error(`${e}`);
+    }
+  }
 }

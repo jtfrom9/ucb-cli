@@ -22,11 +22,11 @@ The following is a brief list of available commands and their functions:
 Usage: ucb-cli <command> [options]
 
 Commands:
-  config <command>           global settings commands
-  project <command>          project setting commands
-  target <command>           target group setting commands
-  build <groupName> [label]  get build information command
-  share <command>            share link modification commands
+  config <command>   global settings commands
+  project <command>  project setting commands
+  target <command>   target group setting commands
+  build <command>    get build information command
+  share <command>    share link modification commands
 
 Options:
   --version  Show version number  [boolean]
@@ -143,7 +143,7 @@ If you specify only a target group, you will get the latest build information fo
 Below example shows the latest build information containing the ShareLink url for each 4 build target of `main` target group (real url are snipped).
 
 ```
-$ ucb-cli build main
+$ ucb-cli build show main
 [
   {
     build: 49,
@@ -201,7 +201,7 @@ Label can be appended to each build from UCB WebUI.
 Below example shows the different build information of `main` target group than the previous example.
 
 ```
-$ ucb-cli build main release/20230217-1.2.3-rc
+$ ucb-cli build show main release/20230217-1.2.3-rc
 [
   {
     build: 34,
